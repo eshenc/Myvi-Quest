@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYVI QUEST | 365 Day Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        rpg: '#7c3aed',
+                        gold: '#f59e0b',
+                        dark: '#0f172a',
+                        energyHigh: '#22c55e',
+                        energyLow: '#ef4444',
+                    },
+                    fontFamily: {
+                        game: ['Segoe UI', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+        .tab-btn.active{
+            background-color:#7c3aed;
+        }
+        .tab-content{
+            display:none;
+        }
+        .tab-content.active{
+            display:block;
+        }
+    </style>
+</head>
+<body class="text-white font-game p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- HEADER -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gold">🎮 MYVI QUEST</h1>
+            <p class="text-slate-300 mt-1">365 DAY CHALLENGE · Real Life RPG | BE International</p>
+            <p class="text-sm text-slate-400">Target Date: 11 Sep 2027 | Goal: RM15,000 Myvi Fund</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button class="tab-btn active px-4 py-2 rounded-lg bg-slate-700" onclick="switchTab('dashboard')">🏠 Dashboard</button>
+            <button class="tab-btn px-4 py-2 rounded-lg bg-slate-700" onclick="switchTab('quest')">🎯 Daily Quest</button>
+            <button class="tab-btn px-4 py-2 rounded-lg bg-slate-700" onclick="switchTab('schedule')">🗓️ Schedule</button>
+            <button class="tab-btn px-4 py-2 rounded-lg bg-slate-700" onclick="switchTab('downline')">👥 Downline</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold text-primary mb-4">🏠 Dashboard</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-dark/60 rounded-lg p-4 text-center">
+                        <div class="text-sm text-slate-400">Level</div>
+                        <div class="text-2xl font-bold text-gold" id="level">1</div>
+                    </div>
+                    <div class="bg-dark/60 rounded-lg p-4 text-center">
+                        <div class="text-sm text-slate-400">XP</div>
+                        <div class="text-2xl font-bold text-white"><span id="xp">0</span>/<span id="xpNext">100</span></div>
+                    </div>
+                    <div class="bg-dark/60 rounded-lg p-4 text-center">
+                        <div class="text-sm text-slate-400">Streak</div>
+                        <div class="text-2xl font-bold text-rpg"><span id="streak">0</span> 🔥</div>
+                    </div>
+                    <div class="bg-dark/60 rounded-lg p-4 text-center">
+                        <div class="text-sm text-slate-400">Myvi Fund</div>
+                        <div class="text-2xl font-bold text-gold">RM<span id="fund">0</span></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-dark/60 rounded-lg p-4">
+                        <div class="text-sm text-slate-400">⚡ Energy Mode</div>
+                        <div class="text-xl font-bold mt-1">
+                            <span id="energyDisplay">High</span>
+                            <span class="text-sm text-slate-400 block">Low Remaining: <span id="lowEnergyLeft">6</span>/6 this month</span>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="setEnergy('high')" class="px-3 py-1 rounded bg-energyHigh">High</button>
+                            <button onclick="setEnergy('low')" class="px-3 py-1 rounded bg-energyLow">Low</button>
+                        </div>
+                    </div>
+                    <div class="bg-dark/60 rounded-lg p-4">
+                        <div class="text-sm text-slate-400">📅 Monthly Refresh Countdown</div>
+                        <div class="text-xl font-bold mt-1" id="countdownText">Days:0 | 00:00:00</div>
+                        <div class="text-xs text-slate-400">Next reset: <span id="monthResetDate"></span></div>
+                    </div>
+                </div>
+
+                <!-- Progress Bars -->
+                <div class="mt-5 space-y-3">
+                    <!-- My PGSV Progress -->
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>👤 My PGSV Progress</span>
+                            <span id="myPgsvText">0 / 10000 PGSV | 0%</span>
+                        </div>
+                        <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                            <div id="myPgsvBar" class="progress-bar h-full bg-gold rounded-full" style="width:0%"></div>
+                        </div>
+                        <div class="mt-1">
+                            <button onclick="editMyPgsv()" class="text-blue-400 text-sm">Edit My PGSV</button>
+                            <button onclick="editMyPgsvTarget()" class="text-purple-400 text-sm ml-3">Edit My Target PGSV</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Myvi Fund Progress</span>
+                            <span id="fundPercent">0%</span>
+                        </div>
+                        <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                            <div id="fundBar" class="progress-bar h-full bg-gold rounded-full" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>365 Day Challenge</span>
+                            <span id="dayPercent">0%</span>
+                        </div>
+                        <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                            <div id="dayBar" class="progress-bar h-full bg-primary rounded-full" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACHIEVEMENTS -->
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold text-primary mb-4">🏆 Achievements</h2>
+                <div id="achievementList" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                </div>
+            </div>
+
+            <!-- BOSS BATTLES -->
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold text-primary mb-4">🐉 Boss Battles</h2>
+                <div id="bossList" class="space-y-3">
+                </div>
+            </div>
+
+            <!-- Control buttons -->
+            <div class="flex gap-3 flex-wrap">
+                <button onclick="addFund()" class="bg-gold hover:bg-gold/80 px-4 py-2 rounded-lg">💰 Add Myvi Fund</button>
+                <button onclick="resetData()" class="bg-red-600 hover:bg-red-600/80 px-4 py-2 rounded-lg">⚠️ Reset All Data</button>
+            </div>
+        </div>
+
+        <!-- Daily Quest Tab -->
+        <div id="quest" class="tab-content">
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold text-primary mb-4">🎯 Daily Quest <span id="todayDay">Day 1</span></h2>
+                <div id="questContainer">
+                </div>
+
+                <div class="mt-5 pt-4 border-t border-slate-700">
+                    <p class="mb-2 text-slate-300">Upload proof screenshot (WhatsApp / sales record / meeting photo)</p>
+                    <input type="file" id="proofImage" accept="image/*" class="mb-3">
+                    <button onclick="submitQuest()" class="bg-rpg hover:bg-rpg/80 px-5 py-2 rounded-lg font-bold">
+                        📸 Submit Proof & AI Verify
+                    </button>
+                    <div id="verifyResult" class="mt-4 hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold text-primary mb-4">🗓️ Schedule Planner</h2>
+                <div class="mb-4">
+                    <input type="text" id="scheduleInput" placeholder="Add schedule e.g: 8pm follow up prospect" class="w-full p-2 rounded bg-slate-800 border border-slate-600">
+                    <button onclick="addSchedule()" class="mt-2 px-4 py-2 rounded bg-primary">Add Schedule</button>
+                </div>
+                <div id="scheduleList" class="space-y-2">
+                </div>
+            </div>
+        </div>
+
+        <!-- Downline Tab -->
+        <div id="downline" class="tab-content">
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold text-primary mb-4">👥 Downline Management (PGSV Tracker)</h2>
+                <div class="mb-4">
+                    <input type="text" id="downlineInput" placeholder="Add downline name" class="w-full p-2 rounded bg-slate-800 border border-slate-600">
+                    <button onclick="addDownline()" class="mt-2 px-4 py-2 rounded bg-primary">Add Downline</button>
+                </div>
+                <div id="downlineList" class="space-y-2">
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ========= DATA STORE (LocalStorage) =========
+const defaultData = {
+    level:1,
+    xp:0,
+    xpNext:100,
+    streak:0,
+    lastCompleteDate:null,
+    fund:0,
+    day:1,
+    energy:"high",
+    lowEnergyUsed:0,
+    lowEnergyMax:6,
+    lastEnergyMonth: new Date().getMonth(),
+    myPgsv: 0,
+    myPgsvTarget: 10000,
+    achievements: {
+        firstSale:false,
+        streak7:false,
+        save1k:false,
+        save5k:false,
+        save10k:false
+    },
+    boss: {
+        boss1:false,
+        boss2:false,
+        boss3:false,
+        finalBoss:false
+    },
+    schedule:[],
+    downline:[],
+    monthStartDate: "2026-09-12"
+};
+let data = JSON.parse(localStorage.getItem('myviQuest')) || defaultData;
+
+// Tab switch
+function switchTab(tabId){
+    document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+}
+
+// Energy
+function setEnergy(mode){
+    const currentMonth = new Date().getMonth();
+    if(currentMonth !== data.lastEnergyMonth){
+        data.lowEnergyUsed = 0;
+        data.lastEnergyMonth = currentMonth;
+    }
+    if(mode === "low"){
+        if(data.lowEnergyUsed >= data.lowEnergyMax){
+            alert("❌ You have used all 6 Low Energy days this month!");
+            return;
+        }
+        data.energy = "low";
+    }else{
+        data.energy = "high";
+    }
+    render();
+}
+
+// Calculate monthly countdown with Days / H / M / S
+function updateCountdown() {
+    const now = new Date();
+    let resetDate;
+    if(now.getMonth() === 8 && now.getFullYear() === 2026){
+        resetDate = new Date(data.monthStartDate);
+    }else{
+        resetDate = new Date(now.getFullYear(), now.getMonth()+1, 1);
+    }
+    document.getElementById('monthResetDate').innerText = resetDate.toLocaleDateString();
+    const diffMs = resetDate - now;
+    if(diffMs <= 0){
+        document.getElementById('countdownText').innerText = "✅ Month Reset Completed";
+        return;
+    }
+    const totalSec = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSec / (60*60*24));
+    const hrs = Math.floor((totalSec % (60*60*24)) / (60*60));
+    const mins = Math.floor((totalSec % (60*60)) / 60);
+    const secs = totalSec % 60;
+    const pad = n=>String(n).padStart(2,"0");
+    document.getElementById('countdownText').innerText = `Days:${days} | ${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+}
+
+// Quest generator: dynamic based on streak, level AND energy
+function generateQuest(){
+    const {streak, level, energy} = data;
+    const fixedQuest = {task:"🤝 Follow up your downline", xp:20};
+    let dynamicQuests = [];
+
+    if(energy === "low"){
+        dynamicQuests = [
+            {task:"💬 Follow up 1 existing customer (Recovery Quest)", xp:30},
+            {task:"📚 10 min BE sales learning", xp:20},
+        ]
+    }else{
+        if(streak >= 5 && level >= 3){
+            dynamicQuests = [
+                {task:"📱 Contact 2 potential BE customers", xp:30},
+                {task:"💬 Follow up 1 customer & try arrange meeting", xp:40},
+                {task:"📚 15 min BE sales learning", xp:20},
+            ]
+        }else if(streak ===0){
+            dynamicQuests = [
+                {task:"💬 Follow up 1 existing customer (Recovery Quest)", xp:30},
+                {task:"📚 10 min BE sales learning", xp:20},
+            ]
+        }else{
+            dynamicQuests = [
+                {task:"📱 Contact 2 potential BE customers", xp:30},
+                {task:"💬 Follow up 1 customer", xp:30},
+                {task:"📚 15 min BE sales learning", xp:20},
+            ]
+        }
+    }
+    return [fixedQuest, ...dynamicQuests];
+}
+
+// Render all static UI
+function render(){
+    document.getElementById('level').innerText = data.level;
+    document.getElementById('xp').innerText = data.xp;
+    document.getElementById('xpNext').innerText = data.xpNext;
+    document.getElementById('streak').innerText = data.streak;
+    document.getElementById('fund').innerText = data.fund;
+    document.getElementById('todayDay').innerText = `Day ${data.day}`;
+
+    // My PGSV calculation
+    const myPgsvPercent = Math.min(100, (data.myPgsv / data.myPgsvTarget) * 100);
+    document.getElementById('myPgsvText').innerText = `${data.myPgsv} / ${data.myPgsvTarget} PGSV | ${myPgsvPercent.toFixed(1)}%`;
+    document.getElementById('myPgsvBar').style.width = `${myPgsvPercent}%`;
+
+    // Energy render
+    document.getElementById('energyDisplay').innerText = data.energy.toUpperCase();
+    document.getElementById('lowEnergyLeft').innerText = data.lowEnergyMax - data.lowEnergyUsed;
+
+    // Fund progress
+    const fundGoal = 15000;
+    const fundPct = Math.min(100, (data.fund / fundGoal)*100).toFixed(1);
+    document.getElementById('fundPercent').innerText = fundPct + "%";
+    document.getElementById('fundBar').style.width = fundPct+"%";
+
+    // Day progress
+    const dayPct = Math.min(100, (data.day / 365)*100).toFixed(1);
+    document.getElementById('dayPercent').innerText = dayPct + "%";
+    document.getElementById('dayBar').style.width = dayPct+"%";
+
+    // Quest
+    const questList = generateQuest();
+    document.getElementById('questContainer').innerHTML = questList.map(q=>`
+        <div class="bg-dark/60 rounded-lg p-3 mb-2">
+            <div>${q.task}</div>
+            <div class="text-sm text-gold">Reward +${q.xp} XP</div>
+        </div>
+    `).join("");
+
+    // Achievements
+    const achs = [
+        {key:"firstSale", name:"🥇 First Sale", done:data.achievements.firstSale},
+        {key:"streak7", name:"🔥 7-Day Streak", done:data.achievements.streak7},
+        {key:"save1k", name:"💰 RM1,000 Saved", done:data.achievements.save1k},
+        {key:"save5k", name:"🏆 RM5,000 Saved", done:data.achievements.save5k},
+        {key:"save10k", name:"🚗 RM10,000 Saved", done:data.achievements.save10k},
+    ]
+    document.getElementById('achievementList').innerHTML = achs.map(a=>`
+        <div class="rounded-lg p-3 ${a.done ? 'bg-gold/20 border border-gold' : 'bg-slate-800 opacity-50'}">${a.name}</div>
+    `).join("");
+
+    // Boss
+    const bosses = [
+        {key:"boss1", name:"🐉 Boss #1: Cold contact new prospect", done:data.boss.boss1},
+        {key:"boss2", name:"🐉 Boss #2: Complete first presentation", done:data.boss.boss2},
+        {key:"boss3", name:"🐉 Boss #3: First RM1,000 Sales", done:data.boss.boss3},
+        {key:"finalBoss", name:"🚗 Final Boss: RM15,000 + Stable Income", done:data.boss.finalBoss},
+    ]
+    document.getElementById('bossList').innerHTML = bosses.map(b=>`
+        <div class="rounded-lg p-3 ${b.done ? 'bg-rpg/20 border border-rpg' : 'bg-slate-800 opacity-50'}">${b.name}</div>
+    `).join("");
+
+    // Schedule List
+    let scheduleHtml = "";
+    data.schedule.forEach((item,idx)=>{
+        scheduleHtml += `
+        <div class="bg-dark/60 rounded-lg p-3 flex justify-between items-center">
+            <span>${item}</span>
+            <button onclick="deleteSchedule(${idx})" class="text-red-400">Delete</button>
+        </div>
+        `;
+    })
+    document.getElementById('scheduleList').innerHTML = scheduleHtml;
+
+    // Downline List with PGSV Progress Bar
+    let downlineHtml = "";
+    data.downline.forEach((person,idx)=>{
+        const progress = Math.min(100, (person.currentPgsv / person.targetPgsv) * 100);
+        downlineHtml += `
+        <div class="bg-dark/60 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-bold">👤 ${person.name}</span>
+                <div class="flex gap-2">
+                    <button onclick="editDownlinePgsv(${idx})" class="text-blue-400">Edit PGSV</button>
+                    <button onclick="editDownlineTarget(${idx})" class="text-purple-400">Edit Target</button>
+                    <button onclick="deleteDownline(${idx})" class="text-red-400">Delete</button>
+                </div>
+            </div>
+            <div class="flex items-center mb-1">
+                <span class="text-gold text-sm">${person.currentPgsv}/${person.targetPgsv} pgsv</span>
+                <span class="ml-auto text-sm">${progress.toFixed(1)}%</span>
+            </div>
+            <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div class="progress-bar h-full bg-gold rounded-full" style="width:${progress}%"></div>
+            </div>
+        </div>
+        `;
+    })
+    document.getElementById('downlineList').innerHTML = downlineHtml;
+
+    saveData();
+}
+
+// My PGSV edit functions
+function editMyPgsv(){
+    const newVal = prompt(`Update your current PGSV:`, data.myPgsv);
+    if(newVal === null) return;
+    const num = parseFloat(newVal);
+    if(!isNaN(num) && num >=0){
+        data.myPgsv = num;
+        render();
+    }else{
+        alert("❌ Please enter valid number >= 0");
+    }
+}
+function editMyPgsvTarget(){
+    const newVal = prompt(`Set your Target PGSV:`, data.myPgsvTarget);
+    if(newVal === null) return;
+    const num = parseFloat(newVal);
+    if(!isNaN(num) && num >0){
+        data.myPgsvTarget = num;
+        render();
+    }else{
+        alert("❌ Target must be greater than 0");
+    }
+}
+
+// Schedule Functions
+function addSchedule(){
+    const val = document.getElementById('scheduleInput').value.trim();
+    if(val){
+        data.schedule.push(val);
+        document.getElementById('scheduleInput').value = "";
+        render();
+    }
+}
+function deleteSchedule(index){
+    data.schedule.splice(index,1);
+    render();
+}
+
+// Downline Functions
+function addDownline(){
+    const name = document.getElementById('downlineInput').value.trim();
+    if(name){
+        data.downline.push({
+            name: name,
+            currentPgsv: 0,
+            targetPgsv: 10000
+        });
+        document.getElementById('downlineInput').value = "";
+        render();
+    }
+}
+function deleteDownline(index){
+    data.downline.splice(index,1);
+    render();
+}
+// Edit current PGSV only
+function editDownlinePgsv(index){
+    const member = data.downline[index];
+    const newCurrent = prompt(`Update Current PGSV for ${member.name}:`, member.currentPgsv);
+    if(newCurrent === null) return;
+    const currNum = parseFloat(newCurrent);
+    if(!isNaN(currNum) && currNum >= 0){
+        data.downline[index].currentPgsv = currNum;
+        render();
+    }else{
+        alert("❌ Please enter a valid number!");
+    }
+}
+// Edit Target PGSV only
+function editDownlineTarget(index){
+    const member = data.downline[index];
+    const newTarget = prompt(`Set Target PGSV for ${member.name}:`, member.targetPgsv);
+    if(newTarget === null) return;
+    const tgtNum = parseFloat(newTarget);
+    if(!isNaN(tgtNum) && tgtNum > 0){
+        data.downline[index].targetPgsv = tgtNum;
+        render();
+    }else{
+        alert("❌ Please enter a valid target number (>0)!");
+    }
+}
+
+// Submit Quest (Simulate AI Verification)
+function submitQuest(){
+    const fileInput = document.getElementById('proofImage');
+    const resultBox = document.getElementById('verifyResult');
+    resultBox.classList.remove('hidden');
+    if(!fileInput.files[0]){
+        resultBox.innerHTML = `<div class="text-red-400">❌ NOT VERIFIED. Please upload screenshot proof.</div>`;
+        return;
+    }
+    if(data.energy === "low"){
+        const currentMonth = new Date().getMonth();
+        if(currentMonth !== data.lastEnergyMonth){
+            data.lowEnergyUsed = 0;
+            data.lastEnergyMonth = currentMonth;
+        }
+        data.lowEnergyUsed +=1;
+    }
+    const questList = generateQuest();
+    const totalXp = questList.reduce((sum,q)=>sum+q.xp,0);
+    resultBox.innerHTML = `
+        <div class="text-green-400">✅ VERIFIED<br>AI confidence: 94%<br>Evidence: Task proof detected<br>+${totalXp} XP earned!</div>
+    `;
+    data.xp += totalXp;
+    while(data.xp >= data.xpNext){
+        data.xp -= data.xpNext;
+        data.level +=1;
+        data.xpNext = Math.floor(data.xpNext * 1.2);
+    }
+    const today = new Date().toLocaleDateString();
+    if(data.lastCompleteDate !== today){
+        data.streak +=1;
+        data.lastCompleteDate = today;
+        data.day +=1;
+    }
+    if(data.streak >=7) data.achievements.streak7 = true;
+    if(data.fund >=1000) data.achievements.save1k = true;
+    if(data.fund >=5000) data.achievements.save5k = true;
+    if(data.fund >=10000) data.achievements.save10k = true;
+    render();
+}
+
+function addFund(){
+    const amount = prompt("Add Myvi Fund amount (RM):");
+    const num = parseFloat(amount);
+    if(!isNaN(num) && num>0){
+        data.fund += num;
+        if(data.fund >=1000) data.boss.boss3 = true;
+        if(data.fund >=15000) data.boss.finalBoss = true;
+        render();
+    }
+}
+
+function resetData(){
+    if(confirm("Reset ALL progress? Cannot undo!")){
+        localStorage.removeItem('myviQuest');
+        data = {...defaultData};
+        render();
+    }
+}
+
+function saveData(){
+    localStorage.setItem('myviQuest', JSON.stringify(data));
+}
+
+// Init
+render();
+updateCountdown();
+setInterval(updateCountdown,1000);
+</script>
+</body>
+</html>
